@@ -38,6 +38,15 @@ class Monitor {
   }
 
   void draw() {
+    
+  // Zombie  
+  if (keyPressed == true) {
+    trip = 1;
+    println("Locked and loaded. Try to think human thoughts.");
+    // servo_serial.write("\0");
+  }
+    
+    
     pushMatrix();
     translate(x, y);
 

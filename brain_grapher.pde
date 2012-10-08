@@ -13,6 +13,7 @@ ControlP5 controlP5;
 ControlFont font;
 
 Serial serial;
+Serial servo_serial;
 
 Channel[] channels = new Channel[11];
 Monitor[] monitors = new Monitor[10];
@@ -22,6 +23,9 @@ ConnectionLight connectionLight;
 int packetCount = 0;
 int globalMax = 0;
 String scaleMode;
+
+// Zombie
+int trip = 0;
 
 void setup() {
   // Set up window
@@ -33,8 +37,10 @@ void setup() {
   // Set up serial connection
   println("Find your Arduino in the list below, note its [index]:\n");
   println(Serial.list());
-  serial = new Serial(this, Serial.list()[0], 9600);	
+  serial =       new Serial(this, Serial.list()[0], 9600);	
+  servo_serial = new Serial(this, Serial.list()[1], 9600);  
   serial.bufferUntil(10);
+  servo_serial.write("\0");
 
   // Set up the ControlP5 knobs and dials
   controlP5 = new ControlP5(this);
@@ -89,7 +95,10 @@ void draw() {
     for (int i = 3; i < channels.length; i++) {
       if (channels[i].maxValue > globalMax) globalMax = channels[i].maxValue;
     }
-  }
+
+    
+    
+}
 
   // Clear the background
   background(255);
@@ -128,6 +137,16 @@ void serialEvent(Serial p) {
         if ((Integer.parseInt(incomingValues[0]) == 200) && (i > 2)) newValue = 0;
 
         channels[i].addDataPoint(newValue);
+        
+        // Zombie
+        if ( trip == 1 ){
+          if (  ((Point)channels[1].points.get(channels[1].points.size()-1)).value < ((Point)channels[2].points.get(channels[2].points.size()-1)).value   ) {
+            println("Bang!");
+            servo_serial.write("~");
+            trip = 0;
+          }
+        }
+
       }
     }
   }
